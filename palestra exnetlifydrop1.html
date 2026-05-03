@@ -1,0 +1,4381 @@
+<!DOCTYPE html>
+<!-- saved from url=(0030)https://palestra1.netlify.app/ -->
+<html lang="it"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diario Allenamento</title>
+<link href="./palestra exnetlifydrop1_files/css2" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f0e;
+    --surface: #161a18;
+    --surface2: #1e2421;
+    --border: #2a3330;
+    --accent: #c8ff00;
+    --accent2: #00ffa3;
+    --text: #e8ede9;
+    --muted: #6b7a72;
+    --danger: #ff4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 32px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+
+  header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  header span {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    padding: 0 32px;
+  }
+
+  .tab {
+    padding: 12px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+  }
+
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab:hover:not(.active) { color: var(--text); }
+
+  .page { display: none; padding: 32px; max-width: 900px; }
+  .page.active { display: block; }
+
+  /* === FORM === */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  select, input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7a72' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    cursor: pointer;
+  }
+
+  select:focus, input:focus { border-color: var(--accent); }
+
+  .row-exercises {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .exercise-row {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+    position: relative;
+  }
+
+  .exercise-row .field label { font-size: 0.6rem; }
+
+  .remove-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 3px;
+    width: 32px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .remove-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+  .btn-add-exercise {
+    background: none;
+    border: 1px dashed var(--border);
+    color: var(--muted);
+    border-radius: 3px;
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
+  }
+
+  .btn-add-exercise:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0d0f0e;
+    border: none;
+    border-radius: 3px;
+    padding: 13px 28px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.15s;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .btn-primary:hover { background: #d4ff1a; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .date-today-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--accent2);
+    border-radius: 3px;
+    padding: 10px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .date-today-btn:hover { border-color: var(--accent2); }
+
+  .date-row { display: flex; gap: 10px; align-items: end; }
+  .date-row .field { flex: 1; }
+
+  /* === STORICO === */
+  .storico-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .storico-filters select, .storico-filters input {
+    width: auto;
+    font-size: 0.75rem;
+    padding: 8px 12px;
+  }
+
+  .day-block {
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .day-header {
+    background: var(--surface2);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .day-date {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+
+  .day-count {
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .ex-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+  }
+
+  .ex-table th {
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .ex-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ex-table tr:last-child td { border-bottom: none; }
+  .ex-table tr:hover td { background: rgba(200,255,0,0.03); }
+
+  .ex-name { font-weight: 500; color: var(--text); }
+
+  .badge {
+    display: inline-block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 2px 7px;
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .intensity-bar {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+  }
+
+  .intensity-pip {
+    width: 5px;
+    height: 14px;
+    border-radius: 1px;
+    background: var(--border);
+  }
+
+  .intensity-pip.on { background: var(--accent2); }
+
+  .empty-state {
+    text-align: center;
+    color: var(--muted);
+    padding: 48px 0;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+  }
+
+  /* === GESTIONE === */
+  .manage-section {
+    margin-bottom: 28px;
+  }
+
+  .manage-section h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+
+  .tag-remove {
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+
+  .tag-remove:hover { color: var(--danger); }
+
+  .add-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .add-row input { flex: 1; }
+
+  .btn-small {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent2);
+    border-radius: 3px;
+    padding: 10px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+  }
+
+  .btn-small:hover { border-color: var(--accent2); }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--accent);
+    color: #0d0f0e;
+    padding: 12px 20px;
+    border-radius: 3px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 999;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+
+  .del-ex-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    cursor: pointer;
+    opacity: 0.7;
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    transition: all 0.15s;
+    line-height: 1;
+    color: var(--muted);
+  }
+  .del-ex-btn:hover { opacity: 1; border-color: #ff4444; color: #ff4444; background: rgba(255,68,68,0.08); }
+
+  .analisi-controls {
+    margin-bottom: 24px;
+    max-width: 320px;
+  }
+
+  .analisi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .analisi-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .chart-wrap {
+    overflow-x: auto;
+    position: relative;
+  }
+
+  .chart-svg {
+    display: block;
+    min-width: 100%;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px 14px;
+  }
+
+  .stat-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-sub {
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .analisi-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    margin-top: 8px;
+  }
+  .analisi-table th {
+    padding: 7px 10px;
+    text-align: left;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .analisi-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .analisi-table tr:last-child td { border-bottom: none; }
+  .analisi-table tr:hover td { background: rgba(200,255,0,0.03); }
+  .delta-pos { color: var(--accent2); }
+  .delta-neg { color: #ff6b6b; }
+  .delta-neu { color: var(--muted); }
+
+  @media (max-width: 640px) {
+    .page { padding: 16px; }
+    header { padding: 16px; }
+    header h1 { font-size: 1.8rem; }
+    .tabs { padding: 0 16px; }
+    .exercise-row {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto auto;
+    }
+    .exercise-row .field:first-child { grid-column: 1 / -1; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>💪 Diario Gym</h1>
+  <span>Tracker allenamento</span>
+</header>
+
+<div class="tabs">
+  <button class="tab" onclick="switchTab(&#39;inserimento&#39;)">+ Inserimento</button>
+  <button class="tab active" onclick="switchTab(&#39;storico&#39;)">📋 Storico</button>
+  <button class="tab" onclick="switchTab(&#39;analisi&#39;)">📈 Analisi</button>
+  <button class="tab" onclick="switchTab(&#39;gestione&#39;)">⚙ Gestione</button>
+</div>
+
+<div id="tab-inserimento" class="page">
+  <div class="form-card">
+    <div class="date-row" style="margin-bottom: 20px;">
+      <div class="field">
+        <label>Data</label>
+        <input type="date" id="input-data">
+      </div>
+      <button class="date-today-btn" onclick="setToday()">Oggi</button>
+    </div>
+    <div class="row-exercises" id="exercises-container"><div class="exercise-row">
+    <div class="field">
+      <label>Esercizio</label>
+      <select class="sel-esercizio">
+        <option value="">Seleziona...</option><option value="PANCA">PANCA</option><option value="PANCA INCLINATA 45 MANUBRI">PANCA INCLINATA 45 MANUBRI</option><option value="MILITARY PRESS">MILITARY PRESS</option><option value="LENTO AVANTI MANUBRI">LENTO AVANTI MANUBRI</option><option value="ALZATE LATERALI">ALZATE LATERALI</option><option value="CHEST PRESS">CHEST PRESS</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Peso (kg)</label>
+      <input type="text" class="inp-peso" placeholder="es. 20">
+    </div>
+    <div class="field">
+      <label>Serie × Rip.</label>
+      <select class="sel-serie">
+        <option value="">Seleziona...</option><option value="3X8">3X8</option><option value="4X6">4X6</option><option value="4X8">4X8</option><option value="4X10">4X10</option><option value="4X4">4X4</option><option value="3X6">3X6</option><option value="5X10">5X10</option><option value="3x8">3x8</option><option value="3x10">3x10</option><option value="4X12">4X12</option><option value="4X14">4X14</option><option value="4X6">4X6</option><option value="3X4">3X4</option><option value="5X5">5X5</option><option value="3X12">3X12</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Intensità (1-10)</label>
+      <select class="sel-intensita">
+        <option value=""></option>
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Recupero (min)</label>
+      <select class="sel-recupero">
+        <option value="">-</option><option value="1">1</option><option value="1.5">1.5</option><option value="2">2</option><option value="2.5">2.5</option><option value="3">3</option>
+      </select>
+    </div>
+    <button class="remove-btn" onclick="this.parentElement.remove()" title="Rimuovi">×</button>
+  </div><div class="exercise-row">
+    <div class="field">
+      <label>Esercizio</label>
+      <select class="sel-esercizio">
+        <option value="">Seleziona...</option><option value="AFFONDI">AFFONDI</option><option value="ALZATE LATERALI">ALZATE LATERALI</option><option value="ALZATE LATERALI AI CAVI">ALZATE LATERALI AI CAVI</option><option value="ARM CURL MANUBRI">ARM CURL MANUBRI</option><option value="BILANCIERE CURVO">BILANCIERE CURVO</option><option value="CHEST (DORSALI)">CHEST (DORSALI)</option><option value="CHEST PRESS">CHEST PRESS</option><option value="CHEST PRESS (DIP TRICIPITI)">CHEST PRESS (DIP TRICIPITI)</option><option value="CROCI CAVO BASSO SU PANCA">CROCI CAVO BASSO SU PANCA</option><option value="CRUNCH">CRUNCH</option><option value="LAT MACHINE (BARRA)">LAT MACHINE (BARRA)</option><option value="LAT MACHINE PRESA STRETTA">LAT MACHINE PRESA STRETTA</option><option value="LAT MACHINE TRIANGOLO">LAT MACHINE TRIANGOLO</option><option value="LEG CURL PRONE">LEG CURL PRONE</option><option value="LEG EXTENSION">LEG EXTENSION</option><option value="LENTO AVANTI MANUBRI">LENTO AVANTI MANUBRI</option><option value="LOW ROW">LOW ROW</option><option value="MILITARY PRESS">MILITARY PRESS</option><option value="PANCA">PANCA</option><option value="PANCA INCLINATA 45 MANUBRI">PANCA INCLINATA 45 MANUBRI</option><option value="PECTORAL MACHINE">PECTORAL MACHINE</option><option value="PLANK">PLANK</option><option value="PRESSA">PRESSA</option><option value="PULL DOWN">PULL DOWN</option><option value="PUSH DOWN CAVO ALTO CORDA">PUSH DOWN CAVO ALTO CORDA</option><option value="SCALCIATE CAVI BASSI">SCALCIATE CAVI BASSI</option><option value="SHOULDER PRESS">SHOULDER PRESS</option><option value="SQUAT">SQUAT</option><option value="TOTAL ABDOMINAL (MACCHINA)">TOTAL ABDOMINAL (MACCHINA)</option><option value="TRAZIONI">TRAZIONI</option><option value="TRAZIONI (MACCHINA)">TRAZIONI (MACCHINA)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Peso (kg)</label>
+      <input type="text" class="inp-peso" placeholder="es. 20">
+    </div>
+    <div class="field">
+      <label>Serie × Rip.</label>
+      <select class="sel-serie">
+        <option value="">Seleziona...</option><option value="2X10">2X10</option><option value="2X6">2X6</option><option value="2X8">2X8</option><option value="3X10">3X10</option><option value="3X12">3X12</option><option value="3X14">3X14</option><option value="3X15">3X15</option><option value="3X19">3X19</option><option value="3X4">3X4</option><option value="3X49SEC">3X49SEC</option><option value="3X5">3X5</option><option value="3X6">3X6</option><option value="3X7">3X7</option><option value="3X8">3X8</option><option value="3X9">3X9</option><option value="4X10">4X10</option><option value="4X12">4X12</option><option value="4X14">4X14</option><option value="4X15">4X15</option><option value="4X4">4X4</option><option value="4X40SEC">4X40SEC</option><option value="4X6">4X6</option><option value="4X7">4X7</option><option value="4X8">4X8</option><option value="5X10">5X10</option><option value="5X4">5X4</option><option value="8 GIRI">8 GIRI</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Intensità (1-10)</label>
+      <select class="sel-intensita">
+        <option value=""></option>
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Recupero (min)</label>
+      <select class="sel-recupero">
+        <option value="">-</option><option value="1">1</option><option value="1.5">1.5</option><option value="2">2</option><option value="2.5">2.5</option><option value="3">3</option>
+      </select>
+    </div>
+    <button class="remove-btn" onclick="this.parentElement.remove()" title="Rimuovi">×</button>
+  </div></div>
+    <button class="btn-add-exercise" onclick="addExerciseRow()">+ Aggiungi esercizio</button>
+  </div>
+  <button class="btn-primary" onclick="salvaAllenamento()">SALVA ALLENAMENTO</button>
+</div>
+
+<div id="tab-storico" class="page active">
+  <div class="storico-filters">
+    <select id="filter-esercizio" onchange="renderStorico()"><option value="">Tutti gli esercizi</option><option value="AFFONDI">AFFONDI</option><option value="ALZATE LATERALI">ALZATE LATERALI</option><option value="ALZATE LATERALI AI CAVI">ALZATE LATERALI AI CAVI</option><option value="ARM CURL MANUBRI">ARM CURL MANUBRI</option><option value="BILANCIERE CURVO">BILANCIERE CURVO</option><option value="CHEST (DORSALI)">CHEST (DORSALI)</option><option value="CHEST PRESS">CHEST PRESS</option><option value="CHEST PRESS (DIP TRICIPITI)">CHEST PRESS (DIP TRICIPITI)</option><option value="CROCI CAVO BASSO SU PANCA">CROCI CAVO BASSO SU PANCA</option><option value="CRUNCH">CRUNCH</option><option value="LAT MACHINE (BARRA)">LAT MACHINE (BARRA)</option><option value="LAT MACHINE PRESA STRETTA">LAT MACHINE PRESA STRETTA</option><option value="LAT MACHINE TRIANGOLO">LAT MACHINE TRIANGOLO</option><option value="LEG CURL PRONE">LEG CURL PRONE</option><option value="LEG EXTENSION">LEG EXTENSION</option><option value="LENTO AVANTI MANUBRI">LENTO AVANTI MANUBRI</option><option value="LOW ROW">LOW ROW</option><option value="MILITARY PRESS">MILITARY PRESS</option><option value="PANCA">PANCA</option><option value="PANCA INCLINATA 45 MANUBRI">PANCA INCLINATA 45 MANUBRI</option><option value="PECTORAL MACHINE">PECTORAL MACHINE</option><option value="PLANK">PLANK</option><option value="PRESSA">PRESSA</option><option value="PULL DOWN">PULL DOWN</option><option value="PUSH DOWN CAVO ALTO CORDA">PUSH DOWN CAVO ALTO CORDA</option><option value="SCALCIATE CAVI BASSI">SCALCIATE CAVI BASSI</option><option value="SHOULDER PRESS">SHOULDER PRESS</option><option value="SQUAT">SQUAT</option><option value="TOTAL ABDOMINAL (MACCHINA)">TOTAL ABDOMINAL (MACCHINA)</option><option value="TRAZIONI">TRAZIONI</option><option value="TRAZIONI (MACCHINA)">TRAZIONI (MACCHINA)</option></select>
+    <input type="month" id="filter-mese" onchange="renderStorico()">
+  </div>
+  <div id="storico-content"><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">domenica 26 aprile 2026</span>
+        <span class="day-count">2 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">LAT MACHINE (BARRA)</td>
+        <td>60</td>
+        <td><span class="badge">3X4</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-26&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CHEST (DORSALI)</td>
+        <td>45</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.6 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-26&#39;,1)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 20 aprile 2026</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PECTORAL MACHINE</td>
+        <td>45</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>—</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-20&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CHEST PRESS</td>
+        <td>50</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-20&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">SHOULDER PRESS</td>
+        <td>22.5</td>
+        <td><span class="badge">4X4</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>—</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-20&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">domenica 19 aprile 2026</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">AFFONDI</td>
+        <td>20</td>
+        <td><span class="badge">8 giri</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>—</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-19&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PRESSA</td>
+        <td>120</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-19&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG EXTENSION</td>
+        <td>42.5</td>
+        <td><span class="badge">4X10</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-19&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">mercoledì 15 aprile 2026</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">LOW ROW</td>
+        <td>52.5</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-15&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LAT MACHINE PRESA STRETTA</td>
+        <td>55</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-15&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ALZATE LATERALI AI CAVI</td>
+        <td>7.5</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>—</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-15&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 13 aprile 2026</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PECTORAL MACHINE</td>
+        <td>50</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-13&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CHEST PRESS</td>
+        <td>55</td>
+        <td><span class="badge">4X4</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-13&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">SHOULDER PRESS</td>
+        <td>22.5</td>
+        <td><span class="badge">4X4</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-13&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">domenica 12 aprile 2026</span>
+        <span class="day-count">1 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">AFFONDI</td>
+        <td>20</td>
+        <td><span class="badge">8 giri</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>—</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-12&#39;,0)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">giovedì 2 aprile 2026</span>
+        <span class="day-count">2 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PECTORAL MACHINE</td>
+        <td>50</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-02&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CHEST PRESS</td>
+        <td>55</td>
+        <td><span class="badge">4X4</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-04-02&#39;,1)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 30 marzo 2026</span>
+        <span class="day-count">4 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PRESSA</td>
+        <td>120</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-30&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PRESSA</td>
+        <td>120</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-30&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG EXTENSION</td>
+        <td>47.5</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-30&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG CURL PRONE</td>
+        <td>30</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>—</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-30&#39;,3)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 23 marzo 2026</span>
+        <span class="day-count">2 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">CHEST PRESS (DIP TRICIPITI)</td>
+        <td>47.5</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-23&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LAT MACHINE PRESA STRETTA</td>
+        <td>55</td>
+        <td><span class="badge">2X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-23&#39;,1)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">domenica 22 marzo 2026</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PECTORAL MACHINE</td>
+        <td>50</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-22&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CHEST PRESS</td>
+        <td>52.5</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-22&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">SHOULDER PRESS</td>
+        <td>22.5</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-22&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">martedì 17 marzo 2026</span>
+        <span class="day-count">1 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PRESSA</td>
+        <td>120</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-17&#39;,0)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 16 marzo 2026</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">LEG EXTENSION</td>
+        <td>45</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-16&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG CURL PRONE</td>
+        <td>30</td>
+        <td><span class="badge">3X5</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-16&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">SHOULDER PRESS</td>
+        <td>25</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-16&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">giovedì 12 marzo 2026</span>
+        <span class="day-count">1 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">LOW ROW</td>
+        <td>52.5</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-12&#39;,0)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">martedì 10 marzo 2026</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PECTORAL MACHINE</td>
+        <td>42.5</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-10&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CHEST PRESS</td>
+        <td>50</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-10&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">SHOULDER PRESS</td>
+        <td>22.5</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-10&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">sabato 7 marzo 2026</span>
+        <span class="day-count">2 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PRESSA</td>
+        <td>100</td>
+        <td><span class="badge">3X10</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-07&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">SCALCIATE CAVI BASSI</td>
+        <td>12.5</td>
+        <td><span class="badge">4X12</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>—</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-07&#39;,1)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">giovedì 5 marzo 2026</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">LOW ROW</td>
+        <td>52.5</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-05&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CHEST PRESS (DIP TRICIPITI)</td>
+        <td>45</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-05&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LAT MACHINE PRESA STRETTA</td>
+        <td>50</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-05&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 2 marzo 2026</span>
+        <span class="day-count">2 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">CHEST PRESS</td>
+        <td>50</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-02&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">SHOULDER PRESS</td>
+        <td>22.5</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-03-02&#39;,1)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">venerdì 27 febbraio 2026</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PRESSA</td>
+        <td>110</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-27&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG EXTENSION</td>
+        <td>40</td>
+        <td><span class="badge">3X10</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-27&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG CURL PRONE</td>
+        <td>30</td>
+        <td><span class="badge">3X7</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-27&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 23 febbraio 2026</span>
+        <span class="day-count">2 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PECTORAL MACHINE</td>
+        <td>40</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-23&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CHEST PRESS</td>
+        <td>50</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-23&#39;,1)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">venerdì 20 febbraio 2026</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">CHEST PRESS</td>
+        <td>50</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-20&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PUSH DOWN CAVO ALTO CORDA</td>
+        <td>17.5</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>—</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-20&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LOW ROW</td>
+        <td>45</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-20&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">mercoledì 18 febbraio 2026</span>
+        <span class="day-count">2 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PECTORAL MACHINE</td>
+        <td>40</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-18&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">SHOULDER PRESS</td>
+        <td>25</td>
+        <td><span class="badge">4X4</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-18&#39;,1)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">domenica 15 febbraio 2026</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">LOW ROW</td>
+        <td>50</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-15&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">SHOULDER PRESS</td>
+        <td>25</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-15&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CHEST PRESS</td>
+        <td>45</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-15&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">venerdì 13 febbraio 2026</span>
+        <span class="day-count">4 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PECTORAL MACHINE</td>
+        <td>40</td>
+        <td><span class="badge">4X7</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-13&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CHEST PRESS</td>
+        <td>45</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-13&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">SHOULDER PRESS</td>
+        <td>25</td>
+        <td><span class="badge">4X4</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-13&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ALZATE LATERALI AI CAVI</td>
+        <td>5</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-13&#39;,3)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">venerdì 6 febbraio 2026</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PECTORAL MACHINE</td>
+        <td>40</td>
+        <td><span class="badge">4X7</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-06&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CHEST PRESS</td>
+        <td>45</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>—</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-06&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">SHOULDER PRESS</td>
+        <td>25</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-02-06&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">venerdì 23 gennaio 2026</span>
+        <span class="day-count">1 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">LOW ROW</td>
+        <td>52.5</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-23&#39;,0)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">domenica 18 gennaio 2026</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PULL DOWN</td>
+        <td>22.5</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>—</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-18&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PUSH DOWN CAVO ALTO CORDA</td>
+        <td>17.5</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-18&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">BILANCIERE CURVO</td>
+        <td>10</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-18&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">mercoledì 14 gennaio 2026</span>
+        <span class="day-count">5 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PANCA</td>
+        <td>30</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-14&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PANCA INCLINATA 45 MANUBRI</td>
+        <td>14</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-14&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">MILITARY PRESS</td>
+        <td>10</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-14&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LENTO AVANTI MANUBRI</td>
+        <td>10</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-14&#39;,3)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CHEST PRESS</td>
+        <td>45</td>
+        <td><span class="badge">4X4</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-14&#39;,4)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 12 gennaio 2026</span>
+        <span class="day-count">4 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PRESSA</td>
+        <td>80</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-12&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG EXTENSION</td>
+        <td>35</td>
+        <td><span class="badge">4X12</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-12&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG CURL PRONE</td>
+        <td>30</td>
+        <td><span class="badge">3X7</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-12&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PLANK</td>
+        <td>—</td>
+        <td><span class="badge">4X40sec</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>—</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-12&#39;,3)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">sabato 10 gennaio 2026</span>
+        <span class="day-count">4 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">TRAZIONI</td>
+        <td>28</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-10&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PULL DOWN</td>
+        <td>22.5</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>—</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-10&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PUSH DOWN CAVO ALTO CORDA</td>
+        <td>17.5</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-10&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">BILANCIERE CURVO</td>
+        <td>10</td>
+        <td><span class="badge">3X10</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-10&#39;,3)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">mercoledì 7 gennaio 2026</span>
+        <span class="day-count">8 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PANCA</td>
+        <td>30</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-07&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PANCA INCLINATA 45 MANUBRI</td>
+        <td>12</td>
+        <td><span class="badge">3X10</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>—</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-07&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">MILITARY PRESS</td>
+        <td>10</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-07&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LENTO AVANTI MANUBRI</td>
+        <td>10</td>
+        <td><span class="badge">3X10</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-07&#39;,3)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LOW ROW</td>
+        <td>50</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-07&#39;,4)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CHEST PRESS</td>
+        <td>45</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-07&#39;,5)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">SHOULDER PRESS</td>
+        <td>20</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-07&#39;,6)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ALZATE LATERALI</td>
+        <td>8</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-07&#39;,7)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 5 gennaio 2026</span>
+        <span class="day-count">1 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PRESSA</td>
+        <td>80</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2026-01-05&#39;,0)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 22 dicembre 2025</span>
+        <span class="day-count">1 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">LAT MACHINE (BARRA)</td>
+        <td>50</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-22&#39;,0)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">mercoledì 10 dicembre 2025</span>
+        <span class="day-count">5 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PANCA</td>
+        <td>30</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-10&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PANCA INCLINATA 45 MANUBRI</td>
+        <td>14</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-10&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">MILITARY PRESS</td>
+        <td>10</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-10&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LENTO AVANTI MANUBRI</td>
+        <td>10</td>
+        <td><span class="badge">3X10</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-10&#39;,3)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ALZATE LATERALI</td>
+        <td>8</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-10&#39;,4)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">martedì 9 dicembre 2025</span>
+        <span class="day-count">4 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PRESSA</td>
+        <td>80</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-09&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG EXTENSION</td>
+        <td>35</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-09&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG CURL PRONE</td>
+        <td>30</td>
+        <td><span class="badge">3X7</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-09&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PLANK</td>
+        <td>—</td>
+        <td><span class="badge">3X49sec</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>—</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-09&#39;,3)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">venerdì 5 dicembre 2025</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">TRAZIONI</td>
+        <td>48</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-05&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LAT MACHINE (BARRA)</td>
+        <td>50</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-05&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ARM CURL MANUBRI</td>
+        <td>10</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-05&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">mercoledì 3 dicembre 2025</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PANCA INCLINATA 45 MANUBRI</td>
+        <td>12</td>
+        <td><span class="badge">4X12</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-03&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LENTO AVANTI MANUBRI</td>
+        <td>10</td>
+        <td><span class="badge">3X10</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-03&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ALZATE LATERALI</td>
+        <td>8</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-03&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 1 dicembre 2025</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PRESSA</td>
+        <td>70</td>
+        <td><span class="badge">4X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-01&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG EXTENSION</td>
+        <td>30</td>
+        <td><span class="badge">4X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-01&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG CURL PRONE</td>
+        <td>30</td>
+        <td><span class="badge">3X7</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-12-01&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">venerdì 28 novembre 2025</span>
+        <span class="day-count">5 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">TRAZIONI</td>
+        <td>34</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-28&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LAT MACHINE (BARRA)</td>
+        <td>50</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-28&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PULL DOWN</td>
+        <td>25</td>
+        <td><span class="badge">3X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-28&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ARM CURL MANUBRI</td>
+        <td>10</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-28&#39;,3)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PUSH DOWN CAVO ALTO CORDA</td>
+        <td>17.5</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-28&#39;,4)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">giovedì 27 novembre 2025</span>
+        <span class="day-count">4 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PANCA</td>
+        <td>30</td>
+        <td><span class="badge">4X4</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-27&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PANCA INCLINATA 45 MANUBRI</td>
+        <td>10</td>
+        <td><span class="badge">4X14</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-27&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">MILITARY PRESS</td>
+        <td>10</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-27&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LENTO AVANTI MANUBRI</td>
+        <td>10</td>
+        <td><span class="badge">3X10</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-27&#39;,3)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">mercoledì 26 novembre 2025</span>
+        <span class="day-count">1 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">ALZATE LATERALI</td>
+        <td>8</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-26&#39;,0)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 24 novembre 2025</span>
+        <span class="day-count">4 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">SQUAT</td>
+        <td>15</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-24&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PRESSA</td>
+        <td>60</td>
+        <td><span class="badge">3X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-24&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG EXTENSION</td>
+        <td>25</td>
+        <td><span class="badge">3X14</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-24&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CRUNCH</td>
+        <td>—</td>
+        <td><span class="badge">4X15</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-24&#39;,3)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">venerdì 21 novembre 2025</span>
+        <span class="day-count">5 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">TRAZIONI</td>
+        <td>34</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-21&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LAT MACHINE (BARRA)</td>
+        <td>45</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-21&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PULL DOWN</td>
+        <td>20</td>
+        <td><span class="badge">4X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-21&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ARM CURL MANUBRI</td>
+        <td>10</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-21&#39;,3)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PUSH DOWN CAVO ALTO CORDA</td>
+        <td>12.5</td>
+        <td><span class="badge">3X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-21&#39;,4)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">mercoledì 19 novembre 2025</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PANCA INCLINATA 45 MANUBRI</td>
+        <td>8</td>
+        <td><span class="badge">4X14</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>1 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-19&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LENTO AVANTI MANUBRI</td>
+        <td>8</td>
+        <td><span class="badge">3X10</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-19&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ALZATE LATERALI</td>
+        <td>8</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-19&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 17 novembre 2025</span>
+        <span class="day-count">5 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">SQUAT</td>
+        <td>15</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-17&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PRESSA</td>
+        <td>50</td>
+        <td><span class="badge">4X10</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-17&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG EXTENSION</td>
+        <td>20</td>
+        <td><span class="badge">4X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-17&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG CURL PRONE</td>
+        <td>20</td>
+        <td><span class="badge">4X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-17&#39;,3)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CRUNCH</td>
+        <td>—</td>
+        <td><span class="badge">4X15</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-17&#39;,4)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">venerdì 14 novembre 2025</span>
+        <span class="day-count">5 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">TRAZIONI</td>
+        <td>34</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-14&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LAT MACHINE (BARRA)</td>
+        <td>40</td>
+        <td><span class="badge">4X10</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>1 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-14&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PULL DOWN</td>
+        <td>17.5</td>
+        <td><span class="badge">4X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-14&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ARM CURL MANUBRI</td>
+        <td>10</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-14&#39;,3)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PUSH DOWN CAVO ALTO CORDA</td>
+        <td>15</td>
+        <td><span class="badge">4X10</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-14&#39;,4)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">mercoledì 12 novembre 2025</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PANCA INCLINATA 45 MANUBRI</td>
+        <td>8</td>
+        <td><span class="badge">4X10</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-12&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">MILITARY PRESS</td>
+        <td>10</td>
+        <td><span class="badge">4X4</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-12&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ALZATE LATERALI</td>
+        <td>6</td>
+        <td><span class="badge">4X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-12&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 10 novembre 2025</span>
+        <span class="day-count">4 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PRESSA</td>
+        <td>50</td>
+        <td><span class="badge">4X10</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-10&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG EXTENSION</td>
+        <td>20</td>
+        <td><span class="badge">4X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-10&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG CURL PRONE</td>
+        <td>20</td>
+        <td><span class="badge">4X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-10&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">CRUNCH</td>
+        <td>—</td>
+        <td><span class="badge">3X15</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-10&#39;,3)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">venerdì 7 novembre 2025</span>
+        <span class="day-count">5 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">TRAZIONI</td>
+        <td>34</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-07&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LAT MACHINE (BARRA)</td>
+        <td>40</td>
+        <td><span class="badge">3X10</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-07&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PULL DOWN</td>
+        <td>17.5</td>
+        <td><span class="badge">3X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-07&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ARM CURL MANUBRI</td>
+        <td>10</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-07&#39;,3)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PUSH DOWN CAVO ALTO CORDA</td>
+        <td>15</td>
+        <td><span class="badge">3X10</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-07&#39;,4)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">mercoledì 5 novembre 2025</span>
+        <span class="day-count">4 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PANCA</td>
+        <td>20</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-05&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PANCA INCLINATA 45 MANUBRI</td>
+        <td>8</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-05&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">MILITARY PRESS</td>
+        <td>15</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>—</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-05&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ALZATE LATERALI</td>
+        <td>6</td>
+        <td><span class="badge">4X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-05&#39;,3)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">martedì 4 novembre 2025</span>
+        <span class="day-count">1 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">LEG EXTENSION</td>
+        <td>20</td>
+        <td><span class="badge">3X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-04&#39;,0)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 3 novembre 2025</span>
+        <span class="day-count">6 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">LENTO AVANTI MANUBRI</td>
+        <td>6</td>
+        <td><span class="badge">4X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-03&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ALZATE LATERALI</td>
+        <td>6</td>
+        <td><span class="badge">4X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-03&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LAT MACHINE (BARRA)</td>
+        <td>35</td>
+        <td><span class="badge">3X10</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>1 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-03&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PULL DOWN</td>
+        <td>17.5</td>
+        <td><span class="badge">4X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-03&#39;,3)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ARM CURL MANUBRI</td>
+        <td>10</td>
+        <td><span class="badge">2X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-03&#39;,4)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LEG CURL PRONE</td>
+        <td>17.5</td>
+        <td><span class="badge">3X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-11-03&#39;,5)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">giovedì 30 ottobre 2025</span>
+        <span class="day-count">3 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PANCA</td>
+        <td>22.5</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>2.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-10-30&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PANCA INCLINATA 45 MANUBRI</td>
+        <td>8</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-10-30&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">MILITARY PRESS</td>
+        <td>15</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-10-30&#39;,2)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">mercoledì 29 ottobre 2025</span>
+        <span class="day-count">1 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">LEG EXTENSION</td>
+        <td>20</td>
+        <td><span class="badge">3X12</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-10-29&#39;,0)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">domenica 26 ottobre 2025</span>
+        <span class="day-count">1 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">LAT MACHINE (BARRA)</td>
+        <td>40</td>
+        <td><span class="badge">3X10</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-10-26&#39;,0)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div><div class="day-block">
+      <div class="day-header">
+        <span class="day-date">lunedì 20 ottobre 2025</span>
+        <span class="day-count">4 esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody><tr>
+        <td class="ex-name">PANCA</td>
+        <td>20</td>
+        <td><span class="badge">4X6</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div></div></td>
+        <td>2.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-10-20&#39;,0)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">PANCA INCLINATA 45 MANUBRI</td>
+        <td>8</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip on"></div><div class="intensity-pip "></div></div></td>
+        <td>2 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-10-20&#39;,1)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">LENTO AVANTI MANUBRI</td>
+        <td>6</td>
+        <td><span class="badge">3X8</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-10-20&#39;,2)" title="Elimina">🗑</button></td>
+      </tr><tr>
+        <td class="ex-name">ALZATE LATERALI</td>
+        <td>6</td>
+        <td><span class="badge">3X12</span></td>
+        <td><div class="intensity-bar"><span style="color:var(--muted)">—</span></div></td>
+        <td>1.5 min</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio(&#39;2025-10-20&#39;,3)" title="Elimina">🗑</button></td>
+      </tr></tbody>
+      </table>
+    </div></div>
+</div>
+
+
+<div id="tab-analisi" class="page">
+  <div class="analisi-controls">
+    <div class="field">
+      <label>Esercizio</label>
+      <select id="analisi-esercizio" onchange="renderAnalisi()"><option value="">Seleziona esercizio...</option><option value="PANCA">PANCA</option><option value="PANCA INCLINATA 45 MANUBRI">PANCA INCLINATA 45 MANUBRI</option><option value="MILITARY PRESS">MILITARY PRESS</option><option value="LENTO AVANTI MANUBRI">LENTO AVANTI MANUBRI</option><option value="ALZATE LATERALI">ALZATE LATERALI</option><option value="CHEST PRESS">CHEST PRESS</option></select>
+    </div>
+  </div>
+  <div id="analisi-content"><div class="empty-state">Seleziona un esercizio per vedere l'analisi.</div></div>
+</div>
+
+<div id="tab-gestione" class="page">
+  <div class="manage-section">
+    <h3>Esercizi</h3>
+    <div class="tag-list" id="list-esercizi"></div>
+    <div class="add-row">
+      <input type="text" id="new-esercizio" placeholder="Nuovo esercizio..." onkeydown="if(event.key===&#39;Enter&#39;) addOption(&#39;esercizi&#39;,&#39;new-esercizio&#39;,&#39;list-esercizi&#39;)">
+      <button class="btn-small" onclick="addOption(&#39;esercizi&#39;,&#39;new-esercizio&#39;,&#39;list-esercizi&#39;)">Aggiungi</button>
+    </div>
+  </div>
+  <div class="manage-section">
+    <h3>Serie × Ripetizioni</h3>
+    <div class="tag-list" id="list-serie"></div>
+    <div class="add-row">
+      <input type="text" id="new-serie" placeholder="Es. 5x5..." onkeydown="if(event.key===&#39;Enter&#39;) addOption(&#39;serie&#39;,&#39;new-serie&#39;,&#39;list-serie&#39;)">
+      <button class="btn-small" onclick="addOption(&#39;serie&#39;,&#39;new-serie&#39;,&#39;list-serie&#39;)">Aggiungi</button>
+    </div>
+  </div>
+  <div class="manage-section">
+    <h3>Recupero (minuti)</h3>
+    <div class="tag-list" id="list-recupero"></div>
+    <div class="add-row">
+      <input type="text" id="new-recupero" placeholder="Es. 3..." onkeydown="if(event.key===&#39;Enter&#39;) addOption(&#39;recupero&#39;,&#39;new-recupero&#39;,&#39;list-recupero&#39;)">
+      <button class="btn-small" onclick="addOption(&#39;recupero&#39;,&#39;new-recupero&#39;,&#39;list-recupero&#39;)">Aggiungi</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== STATO =====
+let data = JSON.parse(localStorage.getItem('gym_data') || '{}');
+// data.opzioni = { esercizi: [], serie: [], recupero: [] }
+// data.allenamenti = [ { data, esercizi: [{esercizio, peso, serie, intensita, recupero}] } ]
+
+if (!data.opzioni) data.opzioni = {
+  esercizi: ["AFFONDI", "ALZATE LATERALI", "ALZATE LATERALI AI CAVI", "ARM CURL MANUBRI", "BILANCIERE CURVO", "CHEST (DORSALI)", "CHEST PRESS", "CHEST PRESS (DIP TRICIPITI)", "CROCI CAVO BASSO SU PANCA", "CRUNCH", "LAT MACHINE (BARRA)", "LAT MACHINE PRESA STRETTA", "LAT MACHINE TRIANGOLO", "LEG CURL PRONE", "LEG EXTENSION", "LENTO AVANTI MANUBRI", "LOW ROW", "MILITARY PRESS", "PANCA", "PANCA INCLINATA 45 MANUBRI", "PECTORAL MACHINE", "PLANK", "PRESSA", "PULL DOWN", "PUSH DOWN CAVO ALTO CORDA", "SCALCIATE CAVI BASSI", "SHOULDER PRESS", "SQUAT", "TOTAL ABDOMINAL (MACCHINA)", "TRAZIONI", "TRAZIONI (MACCHINA)"],
+  serie: ["2X10", "2X6", "2X8", "3X10", "3X12", "3X14", "3X15", "3X19", "3X4", "3X49SEC", "3X5", "3X6", "3X7", "3X8", "3X9", "4X10", "4X12", "4X14", "4X15", "4X4", "4X40SEC", "4X6", "4X7", "4X8", "5X10", "5X4", "8 GIRI"],
+  recupero: ["1","1.5","2","2.5","3"]
+};
+if (!data.allenamenti) data.allenamenti = [];
+
+// Forza reset se i dati provengono da una versione precedente incompleta (< 48 sessioni)
+if (data.allenamenti.length > 0 && data.allenamenti.length < 60) {
+  data.allenamenti = [];
+}
+
+// Dati iniziali dall'Excel
+if (data.allenamenti.length === 0) {
+  const initial = [
+  {
+    "data": "2026-04-26",
+    "esercizi": [
+      {
+        "esercizio": "LAT MACHINE (BARRA)",
+        "peso": "60",
+        "serie": "3X4",
+        "intensita": "9",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "CHEST (DORSALI)",
+        "peso": "45",
+        "serie": "3X6",
+        "intensita": "10",
+        "recupero": "1.6"
+      }
+    ]
+  },
+  {
+    "data": "2026-04-20",
+    "esercizi": [
+      {
+        "esercizio": "PECTORAL MACHINE",
+        "peso": "45",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": ""
+      },
+      {
+        "esercizio": "CHEST PRESS",
+        "peso": "50",
+        "serie": "4X6",
+        "intensita": "8",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "SHOULDER PRESS",
+        "peso": "22.5",
+        "serie": "4X4",
+        "intensita": "10",
+        "recupero": ""
+      }
+    ]
+  },
+  {
+    "data": "2026-04-19",
+    "esercizi": [
+      {
+        "esercizio": "AFFONDI",
+        "peso": "20",
+        "serie": "8 giri",
+        "intensita": "",
+        "recupero": ""
+      },
+      {
+        "esercizio": "PRESSA",
+        "peso": "120",
+        "serie": "4X6",
+        "intensita": "9",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LEG EXTENSION",
+        "peso": "42.5",
+        "serie": "4X10",
+        "intensita": "",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2026-04-15",
+    "esercizi": [
+      {
+        "esercizio": "LOW ROW",
+        "peso": "52.5",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LAT MACHINE PRESA STRETTA",
+        "peso": "55",
+        "serie": "4X6",
+        "intensita": "9",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "ALZATE LATERALI AI CAVI",
+        "peso": "7.5",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": ""
+      }
+    ]
+  },
+  {
+    "data": "2026-04-13",
+    "esercizi": [
+      {
+        "esercizio": "PECTORAL MACHINE",
+        "peso": "50",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "CHEST PRESS",
+        "peso": "55",
+        "serie": "4X4",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "SHOULDER PRESS",
+        "peso": "22.5",
+        "serie": "4X4",
+        "intensita": "10",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2026-04-12",
+    "esercizi": [
+      {
+        "esercizio": "AFFONDI",
+        "peso": "20",
+        "serie": "8 giri",
+        "intensita": "",
+        "recupero": ""
+      }
+    ]
+  },
+  {
+    "data": "2026-04-02",
+    "esercizi": [
+      {
+        "esercizio": "PECTORAL MACHINE",
+        "peso": "50",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "CHEST PRESS",
+        "peso": "55",
+        "serie": "4X4",
+        "intensita": "10",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2026-03-30",
+    "esercizi": [
+      {
+        "esercizio": "PRESSA",
+        "peso": "120",
+        "serie": "4X8",
+        "intensita": "",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PRESSA",
+        "peso": "120",
+        "serie": "4X8",
+        "intensita": "",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LEG EXTENSION",
+        "peso": "47.5",
+        "serie": "3X8",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LEG CURL PRONE",
+        "peso": "30",
+        "serie": "3X8",
+        "intensita": "10",
+        "recupero": ""
+      }
+    ]
+  },
+  {
+    "data": "2026-03-23",
+    "esercizi": [
+      {
+        "esercizio": "CHEST PRESS (DIP TRICIPITI)",
+        "peso": "47.5",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LAT MACHINE PRESA STRETTA",
+        "peso": "55",
+        "serie": "2X6",
+        "intensita": "10",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2026-03-22",
+    "esercizi": [
+      {
+        "esercizio": "PECTORAL MACHINE",
+        "peso": "50",
+        "serie": "4X8",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "CHEST PRESS",
+        "peso": "52.5",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "SHOULDER PRESS",
+        "peso": "22.5",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2026-03-17",
+    "esercizi": [
+      {
+        "esercizio": "PRESSA",
+        "peso": "120",
+        "serie": "3X6",
+        "intensita": "10",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2026-03-16",
+    "esercizi": [
+      {
+        "esercizio": "LEG EXTENSION",
+        "peso": "45",
+        "serie": "3X8",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LEG CURL PRONE",
+        "peso": "30",
+        "serie": "3X5",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "SHOULDER PRESS",
+        "peso": "25",
+        "serie": "3X6",
+        "intensita": "10",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2026-03-12",
+    "esercizi": [
+      {
+        "esercizio": "LOW ROW",
+        "peso": "52.5",
+        "serie": "3X6",
+        "intensita": "10",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2026-03-10",
+    "esercizi": [
+      {
+        "esercizio": "PECTORAL MACHINE",
+        "peso": "42.5",
+        "serie": "4X8",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "CHEST PRESS",
+        "peso": "50",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "SHOULDER PRESS",
+        "peso": "22.5",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2026-03-07",
+    "esercizi": [
+      {
+        "esercizio": "PRESSA",
+        "peso": "100",
+        "serie": "3X10",
+        "intensita": "9",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "SCALCIATE CAVI BASSI",
+        "peso": "12.5",
+        "serie": "4X12",
+        "intensita": "",
+        "recupero": ""
+      }
+    ]
+  },
+  {
+    "data": "2026-03-05",
+    "esercizi": [
+      {
+        "esercizio": "LOW ROW",
+        "peso": "52.5",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "CHEST PRESS (DIP TRICIPITI)",
+        "peso": "45",
+        "serie": "4X8",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LAT MACHINE PRESA STRETTA",
+        "peso": "50",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2026-03-02",
+    "esercizi": [
+      {
+        "esercizio": "CHEST PRESS",
+        "peso": "50",
+        "serie": "3X6",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "SHOULDER PRESS",
+        "peso": "22.5",
+        "serie": "4X6",
+        "intensita": "",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2026-02-27",
+    "esercizi": [
+      {
+        "esercizio": "PRESSA",
+        "peso": "110",
+        "serie": "4X8",
+        "intensita": "9",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LEG EXTENSION",
+        "peso": "40",
+        "serie": "3X10",
+        "intensita": "",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LEG CURL PRONE",
+        "peso": "30",
+        "serie": "3X7",
+        "intensita": "",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2026-02-23",
+    "esercizi": [
+      {
+        "esercizio": "PECTORAL MACHINE",
+        "peso": "40",
+        "serie": "4X8",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "CHEST PRESS",
+        "peso": "50",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2026-02-20",
+    "esercizi": [
+      {
+        "esercizio": "CHEST PRESS",
+        "peso": "50",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PUSH DOWN CAVO ALTO CORDA",
+        "peso": "17.5",
+        "serie": "4X8",
+        "intensita": "10",
+        "recupero": ""
+      },
+      {
+        "esercizio": "LOW ROW",
+        "peso": "45",
+        "serie": "4X8",
+        "intensita": "10",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2026-02-18",
+    "esercizi": [
+      {
+        "esercizio": "PECTORAL MACHINE",
+        "peso": "40",
+        "serie": "4X8",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "SHOULDER PRESS",
+        "peso": "25",
+        "serie": "4X4",
+        "intensita": "",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2026-02-15",
+    "esercizi": [
+      {
+        "esercizio": "LOW ROW",
+        "peso": "50",
+        "serie": "4X6",
+        "intensita": "8",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "SHOULDER PRESS",
+        "peso": "25",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "CHEST PRESS",
+        "peso": "45",
+        "serie": "3X6",
+        "intensita": "10",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2026-02-13",
+    "esercizi": [
+      {
+        "esercizio": "PECTORAL MACHINE",
+        "peso": "40",
+        "serie": "4X7",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "CHEST PRESS",
+        "peso": "45",
+        "serie": "3X6",
+        "intensita": "8",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "SHOULDER PRESS",
+        "peso": "25",
+        "serie": "4X4",
+        "intensita": "",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "ALZATE LATERALI AI CAVI",
+        "peso": "5",
+        "serie": "3X6",
+        "intensita": "",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2026-02-06",
+    "esercizi": [
+      {
+        "esercizio": "PECTORAL MACHINE",
+        "peso": "40",
+        "serie": "4X7",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "CHEST PRESS",
+        "peso": "45",
+        "serie": "3X6",
+        "intensita": "10",
+        "recupero": ""
+      },
+      {
+        "esercizio": "SHOULDER PRESS",
+        "peso": "25",
+        "serie": "4X6",
+        "intensita": "",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2026-01-23",
+    "esercizi": [
+      {
+        "esercizio": "LOW ROW",
+        "peso": "52.5",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2026-01-18",
+    "esercizi": [
+      {
+        "esercizio": "PULL DOWN",
+        "peso": "22.5",
+        "serie": "4X8",
+        "intensita": "",
+        "recupero": ""
+      },
+      {
+        "esercizio": "PUSH DOWN CAVO ALTO CORDA",
+        "peso": "17.5",
+        "serie": "4X8",
+        "intensita": "",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "BILANCIERE CURVO",
+        "peso": "10",
+        "serie": "3X8",
+        "intensita": "",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2026-01-14",
+    "esercizi": [
+      {
+        "esercizio": "PANCA",
+        "peso": "30",
+        "serie": "4X6",
+        "intensita": "9",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PANCA INCLINATA 45 MANUBRI",
+        "peso": "14",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "MILITARY PRESS",
+        "peso": "10",
+        "serie": "3X8",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LENTO AVANTI MANUBRI",
+        "peso": "10",
+        "serie": "3X6",
+        "intensita": "",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "CHEST PRESS",
+        "peso": "45",
+        "serie": "4X4",
+        "intensita": "10",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2026-01-12",
+    "esercizi": [
+      {
+        "esercizio": "PRESSA",
+        "peso": "80",
+        "serie": "4X8",
+        "intensita": "",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LEG EXTENSION",
+        "peso": "35",
+        "serie": "4X12",
+        "intensita": "",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LEG CURL PRONE",
+        "peso": "30",
+        "serie": "3X7",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PLANK",
+        "peso": "",
+        "serie": "4X40sec",
+        "intensita": "",
+        "recupero": ""
+      }
+    ]
+  },
+  {
+    "data": "2026-01-10",
+    "esercizi": [
+      {
+        "esercizio": "TRAZIONI",
+        "peso": "28",
+        "serie": "3X6",
+        "intensita": "",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PULL DOWN",
+        "peso": "22.5",
+        "serie": "4X8",
+        "intensita": "",
+        "recupero": ""
+      },
+      {
+        "esercizio": "PUSH DOWN CAVO ALTO CORDA",
+        "peso": "17.5",
+        "serie": "4X8",
+        "intensita": "",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "BILANCIERE CURVO",
+        "peso": "10",
+        "serie": "3X10",
+        "intensita": "",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2026-01-07",
+    "esercizi": [
+      {
+        "esercizio": "PANCA",
+        "peso": "30",
+        "serie": "4X6",
+        "intensita": "9",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PANCA INCLINATA 45 MANUBRI",
+        "peso": "12",
+        "serie": "3X10",
+        "intensita": "",
+        "recupero": ""
+      },
+      {
+        "esercizio": "MILITARY PRESS",
+        "peso": "10",
+        "serie": "3X8",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LENTO AVANTI MANUBRI",
+        "peso": "10",
+        "serie": "3X10",
+        "intensita": "",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LOW ROW",
+        "peso": "50",
+        "serie": "4X6",
+        "intensita": "",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "CHEST PRESS",
+        "peso": "45",
+        "serie": "4X6",
+        "intensita": "9",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "SHOULDER PRESS",
+        "peso": "20",
+        "serie": "4X8",
+        "intensita": "",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "ALZATE LATERALI",
+        "peso": "8",
+        "serie": "3X8",
+        "intensita": "8",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2026-01-05",
+    "esercizi": [
+      {
+        "esercizio": "PRESSA",
+        "peso": "80",
+        "serie": "4X8",
+        "intensita": "8",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-12-22",
+    "esercizi": [
+      {
+        "esercizio": "LAT MACHINE (BARRA)",
+        "peso": "50",
+        "serie": "3X6",
+        "intensita": "",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-12-10",
+    "esercizi": [
+      {
+        "esercizio": "PANCA",
+        "peso": "30",
+        "serie": "4X6",
+        "intensita": "9",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PANCA INCLINATA 45 MANUBRI",
+        "peso": "14",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "MILITARY PRESS",
+        "peso": "10",
+        "serie": "3X8",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LENTO AVANTI MANUBRI",
+        "peso": "10",
+        "serie": "3X10",
+        "intensita": "",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "ALZATE LATERALI",
+        "peso": "8",
+        "serie": "3X8",
+        "intensita": "8",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-12-09",
+    "esercizi": [
+      {
+        "esercizio": "PRESSA",
+        "peso": "80",
+        "serie": "4X8",
+        "intensita": "8",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LEG EXTENSION",
+        "peso": "35",
+        "serie": "4X8",
+        "intensita": "",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LEG CURL PRONE",
+        "peso": "30",
+        "serie": "3X7",
+        "intensita": "",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PLANK",
+        "peso": "",
+        "serie": "3X49sec",
+        "intensita": "",
+        "recupero": ""
+      }
+    ]
+  },
+  {
+    "data": "2025-12-05",
+    "esercizi": [
+      {
+        "esercizio": "TRAZIONI",
+        "peso": "48",
+        "serie": "3X6",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LAT MACHINE (BARRA)",
+        "peso": "50",
+        "serie": "3X6",
+        "intensita": "9",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "ARM CURL MANUBRI",
+        "peso": "10",
+        "serie": "3X8",
+        "intensita": "10",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2025-12-03",
+    "esercizi": [
+      {
+        "esercizio": "PANCA INCLINATA 45 MANUBRI",
+        "peso": "12",
+        "serie": "4X12",
+        "intensita": "",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LENTO AVANTI MANUBRI",
+        "peso": "10",
+        "serie": "3X10",
+        "intensita": "",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "ALZATE LATERALI",
+        "peso": "8",
+        "serie": "3X8",
+        "intensita": "",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-12-01",
+    "esercizi": [
+      {
+        "esercizio": "PRESSA",
+        "peso": "70",
+        "serie": "4X12",
+        "intensita": "8",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LEG EXTENSION",
+        "peso": "30",
+        "serie": "4X12",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LEG CURL PRONE",
+        "peso": "30",
+        "serie": "3X7",
+        "intensita": "10",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2025-11-28",
+    "esercizi": [
+      {
+        "esercizio": "TRAZIONI",
+        "peso": "34",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LAT MACHINE (BARRA)",
+        "peso": "50",
+        "serie": "3X6",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "PULL DOWN",
+        "peso": "25",
+        "serie": "3X6",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "ARM CURL MANUBRI",
+        "peso": "10",
+        "serie": "3X8",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PUSH DOWN CAVO ALTO CORDA",
+        "peso": "17.5",
+        "serie": "4X8",
+        "intensita": "10",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-11-27",
+    "esercizi": [
+      {
+        "esercizio": "PANCA",
+        "peso": "30",
+        "serie": "4X4",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PANCA INCLINATA 45 MANUBRI",
+        "peso": "10",
+        "serie": "4X14",
+        "intensita": "9",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "MILITARY PRESS",
+        "peso": "10",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LENTO AVANTI MANUBRI",
+        "peso": "10",
+        "serie": "3X10",
+        "intensita": "10",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-11-26",
+    "esercizi": [
+      {
+        "esercizio": "ALZATE LATERALI",
+        "peso": "8",
+        "serie": "4X8",
+        "intensita": "10",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-11-24",
+    "esercizi": [
+      {
+        "esercizio": "SQUAT",
+        "peso": "15",
+        "serie": "3X8",
+        "intensita": "9",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PRESSA",
+        "peso": "60",
+        "serie": "3X12",
+        "intensita": "9",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LEG EXTENSION",
+        "peso": "25",
+        "serie": "3X14",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "CRUNCH",
+        "peso": "",
+        "serie": "4X15",
+        "intensita": "",
+        "recupero": "1"
+      }
+    ]
+  },
+  {
+    "data": "2025-11-21",
+    "esercizi": [
+      {
+        "esercizio": "TRAZIONI",
+        "peso": "34",
+        "serie": "3X8",
+        "intensita": "9",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LAT MACHINE (BARRA)",
+        "peso": "45",
+        "serie": "3X8",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "PULL DOWN",
+        "peso": "20",
+        "serie": "4X12",
+        "intensita": "10",
+        "recupero": "1"
+      },
+      {
+        "esercizio": "ARM CURL MANUBRI",
+        "peso": "10",
+        "serie": "3X8",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PUSH DOWN CAVO ALTO CORDA",
+        "peso": "12.5",
+        "serie": "3X12",
+        "intensita": "10",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-11-19",
+    "esercizi": [
+      {
+        "esercizio": "PANCA INCLINATA 45 MANUBRI",
+        "peso": "8",
+        "serie": "4X14",
+        "intensita": "9",
+        "recupero": "1"
+      },
+      {
+        "esercizio": "LENTO AVANTI MANUBRI",
+        "peso": "8",
+        "serie": "3X10",
+        "intensita": "",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "ALZATE LATERALI",
+        "peso": "8",
+        "serie": "3X8",
+        "intensita": "10",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-11-17",
+    "esercizi": [
+      {
+        "esercizio": "SQUAT",
+        "peso": "15",
+        "serie": "3X8",
+        "intensita": "9",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PRESSA",
+        "peso": "50",
+        "serie": "4X10",
+        "intensita": "9",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LEG EXTENSION",
+        "peso": "20",
+        "serie": "4X12",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LEG CURL PRONE",
+        "peso": "20",
+        "serie": "4X12",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "CRUNCH",
+        "peso": "",
+        "serie": "4X15",
+        "intensita": "",
+        "recupero": "1"
+      }
+    ]
+  },
+  {
+    "data": "2025-11-14",
+    "esercizi": [
+      {
+        "esercizio": "TRAZIONI",
+        "peso": "34",
+        "serie": "3X8",
+        "intensita": "9",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LAT MACHINE (BARRA)",
+        "peso": "40",
+        "serie": "4X10",
+        "intensita": "9",
+        "recupero": "1"
+      },
+      {
+        "esercizio": "PULL DOWN",
+        "peso": "17.5",
+        "serie": "4X12",
+        "intensita": "10",
+        "recupero": "1"
+      },
+      {
+        "esercizio": "ARM CURL MANUBRI",
+        "peso": "10",
+        "serie": "3X8",
+        "intensita": "",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PUSH DOWN CAVO ALTO CORDA",
+        "peso": "15",
+        "serie": "4X10",
+        "intensita": "10",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-11-12",
+    "esercizi": [
+      {
+        "esercizio": "PANCA INCLINATA 45 MANUBRI",
+        "peso": "8",
+        "serie": "4X10",
+        "intensita": "10",
+        "recupero": "1"
+      },
+      {
+        "esercizio": "MILITARY PRESS",
+        "peso": "10",
+        "serie": "4X4",
+        "intensita": "",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "ALZATE LATERALI",
+        "peso": "6",
+        "serie": "4X12",
+        "intensita": "10",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-11-10",
+    "esercizi": [
+      {
+        "esercizio": "PRESSA",
+        "peso": "50",
+        "serie": "4X10",
+        "intensita": "9",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LEG EXTENSION",
+        "peso": "20",
+        "serie": "4X12",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LEG CURL PRONE",
+        "peso": "20",
+        "serie": "4X12",
+        "intensita": "10",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "CRUNCH",
+        "peso": "",
+        "serie": "3X15",
+        "intensita": "",
+        "recupero": "1"
+      }
+    ]
+  },
+  {
+    "data": "2025-11-07",
+    "esercizi": [
+      {
+        "esercizio": "TRAZIONI",
+        "peso": "34",
+        "serie": "3X8",
+        "intensita": "9",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LAT MACHINE (BARRA)",
+        "peso": "40",
+        "serie": "3X10",
+        "intensita": "",
+        "recupero": "1"
+      },
+      {
+        "esercizio": "PULL DOWN",
+        "peso": "17.5",
+        "serie": "3X12",
+        "intensita": "9",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "ARM CURL MANUBRI",
+        "peso": "10",
+        "serie": "3X8",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PUSH DOWN CAVO ALTO CORDA",
+        "peso": "15",
+        "serie": "3X10",
+        "intensita": "10",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-11-05",
+    "esercizi": [
+      {
+        "esercizio": "PANCA",
+        "peso": "20",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "PANCA INCLINATA 45 MANUBRI",
+        "peso": "8",
+        "serie": "3X8",
+        "intensita": "8",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "MILITARY PRESS",
+        "peso": "15",
+        "serie": "4X8",
+        "intensita": "9",
+        "recupero": ""
+      },
+      {
+        "esercizio": "ALZATE LATERALI",
+        "peso": "6",
+        "serie": "4X12",
+        "intensita": "9",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-11-04",
+    "esercizi": [
+      {
+        "esercizio": "LEG EXTENSION",
+        "peso": "20",
+        "serie": "3X12",
+        "intensita": "10",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-11-03",
+    "esercizi": [
+      {
+        "esercizio": "LENTO AVANTI MANUBRI",
+        "peso": "6",
+        "serie": "4X8",
+        "intensita": "9",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "ALZATE LATERALI",
+        "peso": "6",
+        "serie": "4X12",
+        "intensita": "9",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "LAT MACHINE (BARRA)",
+        "peso": "35",
+        "serie": "3X10",
+        "intensita": "9",
+        "recupero": "1"
+      },
+      {
+        "esercizio": "PULL DOWN",
+        "peso": "17.5",
+        "serie": "4X12",
+        "intensita": "9",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "ARM CURL MANUBRI",
+        "peso": "10",
+        "serie": "2X8",
+        "intensita": "10",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LEG CURL PRONE",
+        "peso": "17.5",
+        "serie": "3X12",
+        "intensita": "10",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-10-30",
+    "esercizi": [
+      {
+        "esercizio": "PANCA",
+        "peso": "22.5",
+        "serie": "4X6",
+        "intensita": "9",
+        "recupero": "2.5"
+      },
+      {
+        "esercizio": "PANCA INCLINATA 45 MANUBRI",
+        "peso": "8",
+        "serie": "3X8",
+        "intensita": "8",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "MILITARY PRESS",
+        "peso": "15",
+        "serie": "3X8",
+        "intensita": "",
+        "recupero": "2"
+      }
+    ]
+  },
+  {
+    "data": "2025-10-29",
+    "esercizi": [
+      {
+        "esercizio": "LEG EXTENSION",
+        "peso": "20",
+        "serie": "3X12",
+        "intensita": "10",
+        "recupero": "1.5"
+      }
+    ]
+  },
+  {
+    "data": "2025-10-26",
+    "esercizi": [
+      {
+        "esercizio": "LAT MACHINE (BARRA)",
+        "peso": "40",
+        "serie": "3X10",
+        "intensita": "",
+        "recupero": "1"
+      }
+    ]
+  },
+  {
+    "data": "2025-10-20",
+    "esercizi": [
+      {
+        "esercizio": "PANCA",
+        "peso": "20",
+        "serie": "4X6",
+        "intensita": "10",
+        "recupero": "2.5"
+      },
+      {
+        "esercizio": "PANCA INCLINATA 45 MANUBRI",
+        "peso": "8",
+        "serie": "3X8",
+        "intensita": "9",
+        "recupero": "2"
+      },
+      {
+        "esercizio": "LENTO AVANTI MANUBRI",
+        "peso": "6",
+        "serie": "3X8",
+        "intensita": "",
+        "recupero": "1.5"
+      },
+      {
+        "esercizio": "ALZATE LATERALI",
+        "peso": "6",
+        "serie": "3X12",
+        "intensita": "",
+        "recupero": "1.5"
+      }
+    ]
+  }
+];
+  data.allenamenti = initial;
+  save();
+}
+
+function save() {
+  localStorage.setItem('gym_data', JSON.stringify(data));
+}
+
+// ===== TAB =====
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'storico') renderStorico();
+  if (name === 'gestione') renderGestione();
+  if (name === 'analisi') renderAnalisi();
+}
+
+// ===== INSERIMENTO =====
+function setToday() {
+  document.getElementById('input-data').value = new Date().toISOString().split('T')[0];
+}
+setToday();
+
+function buildSelect(options, placeholder) {
+  return `<option value="">${placeholder}</option>` +
+    options.map(o => `<option value="${o}">${o}</option>`).join('');
+}
+
+function addExerciseRow(prefill = {}) {
+  const container = document.getElementById('exercises-container');
+  const row = document.createElement('div');
+  row.className = 'exercise-row';
+  row.innerHTML = `
+    <div class="field">
+      <label>Esercizio</label>
+      <select class="sel-esercizio">
+        ${buildSelect(data.opzioni.esercizi, 'Seleziona...')}
+      </select>
+    </div>
+    <div class="field">
+      <label>Peso (kg)</label>
+      <input type="text" class="inp-peso" placeholder="es. 20">
+    </div>
+    <div class="field">
+      <label>Serie × Rip.</label>
+      <select class="sel-serie">
+        ${buildSelect(data.opzioni.serie, 'Seleziona...')}
+      </select>
+    </div>
+    <div class="field">
+      <label>Intensità (1-10)</label>
+      <select class="sel-intensita">
+        <option value=""></option>
+        ${[1,2,3,4,5,6,7,8,9,10].map(n=>`<option value="${n}">${n}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field">
+      <label>Recupero (min)</label>
+      <select class="sel-recupero">
+        ${buildSelect(data.opzioni.recupero, '-')}
+      </select>
+    </div>
+    <button class="remove-btn" onclick="this.parentElement.remove()" title="Rimuovi">×</button>
+  `;
+  if (prefill.esercizio) row.querySelector('.sel-esercizio').value = prefill.esercizio;
+  if (prefill.peso) row.querySelector('.inp-peso').value = prefill.peso;
+  if (prefill.serie) row.querySelector('.sel-serie').value = prefill.serie;
+  if (prefill.intensita) row.querySelector('.sel-intensita').value = prefill.intensita;
+  if (prefill.recupero) row.querySelector('.sel-recupero').value = prefill.recupero;
+  container.appendChild(row);
+}
+
+// Start with 1 row
+addExerciseRow();
+
+function salvaAllenamento() {
+  const dataVal = document.getElementById('input-data').value;
+  if (!dataVal) return showToast('Inserisci la data!');
+  const rows = document.querySelectorAll('.exercise-row');
+  if (!rows.length) return showToast('Aggiungi almeno un esercizio!');
+
+  const esercizi = [];
+  for (const row of rows) {
+    const es = row.querySelector('.sel-esercizio').value;
+    if (!es) continue;
+    esercizi.push({
+      esercizio: es,
+      peso: row.querySelector('.inp-peso').value,
+      serie: row.querySelector('.sel-serie').value,
+      intensita: row.querySelector('.sel-intensita').value,
+      recupero: row.querySelector('.sel-recupero').value,
+    });
+  }
+
+  if (!esercizi.length) return showToast('Seleziona almeno un esercizio!');
+
+  // Aggiorna o aggiungi
+  const idx = data.allenamenti.findIndex(a => a.data === dataVal);
+  if (idx >= 0) {
+    data.allenamenti[idx].esercizi.push(...esercizi);
+  } else {
+    data.allenamenti.push({ data: dataVal, esercizi });
+    data.allenamenti.sort((a,b) => b.data.localeCompare(a.data));
+  }
+  save();
+  showToast('Allenamento salvato! ✓');
+
+  // Reset form
+  document.getElementById('exercises-container').innerHTML = '';
+  addExerciseRow();
+}
+
+// ===== STORICO =====
+function renderStorico() {
+  const filterEs = document.getElementById('filter-esercizio').value;
+  const filterMese = document.getElementById('filter-mese').value;
+
+  // Aggiorna il select esercizi
+  const selEs = document.getElementById('filter-esercizio');
+  const currentVal = selEs.value;
+  selEs.innerHTML = '<option value="">Tutti gli esercizi</option>' +
+    data.opzioni.esercizi.map(e => `<option value="${e}" ${e===currentVal?'selected':''}>${e}</option>`).join('');
+
+  const container = document.getElementById('storico-content');
+  let filtered = [...data.allenamenti];
+
+  if (filterMese) filtered = filtered.filter(a => a.data.startsWith(filterMese));
+
+  if (filterEs) {
+    filtered = filtered.map(a => ({
+      ...a,
+      esercizi: a.esercizi.filter(e => e.esercizio === filterEs)
+    })).filter(a => a.esercizi.length);
+  }
+
+  if (!filtered.length) {
+    container.innerHTML = '<div class="empty-state">Nessun allenamento trovato.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(a => {
+    const dateObj = new Date(a.data + 'T12:00:00');
+    const dateStr = dateObj.toLocaleDateString('it-IT', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    const rows = a.esercizi.map((e, ei) => {
+      const intVal = parseInt(e.intensita) || 0;
+      const pips = Array.from({length:10},(_,i)=>`<div class="intensity-pip ${i<intVal?'on':''}"></div>`).join('');
+      return `<tr>
+        <td class="ex-name">${e.esercizio}</td>
+        <td>${e.peso || '—'}</td>
+        <td><span class="badge">${e.serie || '—'}</span></td>
+        <td><div class="intensity-bar">${intVal ? pips : '<span style="color:var(--muted)">—</span>'}</div></td>
+        <td>${e.recupero ? e.recupero + ' min' : '—'}</td>
+        <td><button class="del-ex-btn" onclick="cancellaEsercizio('${a.data}',${ei})" title="Elimina">🗑</button></td>
+      </tr>`;
+    }).join('');
+    return `<div class="day-block">
+      <div class="day-header">
+        <span class="day-date">${dateStr}</span>
+        <span class="day-count">${a.esercizi.length} esercizi</span>
+      </div>
+      <table class="ex-table">
+        <thead><tr>
+          <th>Esercizio</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  }).join('');
+}
+
+// ===== GESTIONE =====
+function renderGestione() {
+  renderTagList('esercizi', 'list-esercizi');
+  renderTagList('serie', 'list-serie');
+  renderTagList('recupero', 'list-recupero');
+}
+
+function renderTagList(key, listId) {
+  const list = document.getElementById(listId);
+  list.innerHTML = data.opzioni[key].map((item, i) => `
+    <div class="tag">
+      <span>${item}</span>
+      <span class="tag-remove" onclick="removeOption('${key}', ${i}, '${listId}')">×</span>
+    </div>
+  `).join('');
+}
+
+function addOption(key, inputId, listId) {
+  const input = document.getElementById(inputId);
+  const val = input.value.trim().toUpperCase();
+  if (!val) return;
+  if (data.opzioni[key].includes(val)) return showToast('Già presente!');
+  data.opzioni[key].push(val);
+  save();
+  input.value = '';
+  renderTagList(key, listId);
+  showToast('Aggiunto: ' + val);
+}
+
+function removeOption(key, idx, listId) {
+  data.opzioni[key].splice(idx, 1);
+  save();
+  renderTagList(key, listId);
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+
+// ===== CANCELLA ESERCIZIO =====
+function cancellaEsercizio(dataAllen, idxEx) {
+  const idx = data.allenamenti.findIndex(a => a.data === dataAllen);
+  if (idx < 0) return;
+  const nome = data.allenamenti[idx].esercizi[idxEx]?.esercizio || 'esercizio';
+  if (!confirm(`Eliminare "\${nome}" del \${dataAllen}?`)) return;
+  data.allenamenti[idx].esercizi.splice(idxEx, 1);
+  if (data.allenamenti[idx].esercizi.length === 0) {
+    data.allenamenti.splice(idx, 1);
+  }
+  save();
+  renderStorico();
+  showToast('Esercizio eliminato');
+}
+
+// ===== ANALISI =====
+function renderAnalisi() {
+  const sel = document.getElementById('analisi-esercizio');
+  // Rebuild options
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Seleziona esercizio...</option>' +
+    data.opzioni.esercizi.map(e => `<option value="${e}" ${e===cur?'selected':''}>${e}</option>`).join('');
+
+  const esNome = sel.value;
+  const container = document.getElementById('analisi-content');
+  if (!esNome) { container.innerHTML = '<div class="empty-state">Seleziona un esercizio per vedere l\'analisi.</div>'; return; }
+
+  // Collect all sessions for this exercise, oldest first
+  const sessioni = [];
+  [...data.allenamenti].reverse().forEach(a => {
+    a.esercizi.forEach(e => {
+      if (e.esercizio !== esNome) return;
+      const pesoNum = parseFloat(e.peso);
+      const serieMatch = e.serie.match(/(\d+)[xX](\d+)/);
+      const nSerie = serieMatch ? parseInt(serieMatch[1]) : null;
+      const nRip   = serieMatch ? parseInt(serieMatch[2]) : null;
+      const volume = (!isNaN(pesoNum) && nSerie && nRip) ? pesoNum * nSerie * nRip : null;
+      sessioni.push({
+        data: a.data,
+        peso: e.peso,
+        pesoNum: isNaN(pesoNum) ? null : pesoNum,
+        serie: e.serie,
+        nSerie, nRip, volume,
+        intensita: e.intensita,
+        recupero: e.recupero
+      });
+    });
+  });
+
+  if (!sessioni.length) { container.innerHTML = '<div class="empty-state">Nessuna sessione trovata per questo esercizio.</div>'; return; }
+
+  // Stats
+  const pesinum = sessioni.map(s=>s.pesoNum).filter(v=>v!==null);
+  const volumi  = sessioni.map(s=>s.volume).filter(v=>v!==null);
+  const maxPeso = pesinum.length ? Math.max(...pesinum) : null;
+  const minPeso = pesinum.length ? Math.min(...pesinum) : null;
+  const maxVol  = volumi.length  ? Math.max(...volumi)  : null;
+  const lastPeso = [...sessioni].filter(s=>s.pesoNum!==null).pop();
+  const firstPeso= sessioni.find(s=>s.pesoNum!==null);
+  const deltaPeso = (firstPeso && lastPeso && firstPeso !== lastPeso) ? lastPeso.pesoNum - firstPeso.pesoNum : null;
+
+  container.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-label">Sessioni totali</div>
+        <div class="stat-value">${sessioni.length}</div>
+      </div>
+      ${maxPeso!==null ? `<div class="stat-box">
+        <div class="stat-label">Peso massimo</div>
+        <div class="stat-value">${maxPeso}</div>
+        <div class="stat-sub">kg</div>
+      </div>` : ''}
+      ${deltaPeso!==null ? `<div class="stat-box">
+        <div class="stat-label">Progressione peso</div>
+        <div class="stat-value ${deltaPeso>0?'delta-pos':deltaPeso<0?'delta-neg':'delta-neu'}">${deltaPeso>0?'+':''}${deltaPeso}</div>
+        <div class="stat-sub">kg da inizio</div>
+      </div>` : ''}
+      ${maxVol!==null ? `<div class="stat-box">
+        <div class="stat-label">Volume massimo</div>
+        <div class="stat-value">${maxVol}</div>
+        <div class="stat-sub">kg totali (peso×serie×rip)</div>
+      </div>` : ''}
+    </div>
+
+    ${pesinum.length >= 2 ? buildChart(sessioni, 'peso') : ''}
+    ${volumi.length >= 2  ? buildChart(sessioni, 'volume') : ''}
+
+    <div class="analisi-card">
+      <h3>Tutte le sessioni</h3>
+      <table class="analisi-table">
+        <thead><tr><th>Data</th><th>Peso</th><th>Serie</th><th>Intensità</th><th>Recupero</th><th>Volume</th><th>Δ Peso</th></tr></thead>
+        <tbody>
+          ${sessioni.map((s,i) => {
+            const prev = sessioni.slice(0,i).filter(x=>x.pesoNum!==null).pop();
+            const delta = (s.pesoNum!==null && prev) ? s.pesoNum - prev.pesoNum : null;
+            const deltaStr = delta===null ? '' : delta===0 ? '<span class="delta-neu">—</span>' :
+              `<span class="${delta>0?'delta-pos':'delta-neg'}">${delta>0?'+':''}${delta}</span>`;
+            const d = new Date(s.data+'T12:00:00');
+            const ds = d.toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'2-digit'});
+            return `<tr>
+              <td>${ds}</td>
+              <td><strong>${s.peso||'—'}</strong></td>
+              <td><span class="badge">${s.serie||'—'}</span></td>
+              <td>${s.intensita||'—'}</td>
+              <td>${s.recupero?s.recupero+' min':'—'}</td>
+              <td>${s.volume!==null?s.volume:'—'}</td>
+              <td>${deltaStr}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function buildChart(sessioni, tipo) {
+  const pts = sessioni.filter(s => tipo==='peso' ? s.pesoNum!==null : s.volume!==null);
+  if (pts.length < 2) return '';
+  const vals = pts.map(s => tipo==='peso' ? s.pesoNum : s.volume);
+  const minV = Math.min(...vals);
+  const maxV = Math.max(...vals);
+  const range = maxV - minV || 1;
+
+  const W = 800, H = 180, PAD = { t:20, r:20, b:40, l:50 };
+  const cW = W - PAD.l - PAD.r;
+  const cH = H - PAD.t - PAD.b;
+
+  const x = i => PAD.l + (i / (pts.length-1)) * cW;
+  const y = v => PAD.t + cH - ((v - minV) / range) * cH;
+
+  // Build polyline
+  const points = pts.map((s,i) => `${x(i)},${y(vals[i])}`).join(' ');
+
+  // Build area
+  const areaPoints = `${x(0)},${PAD.t+cH} ` + pts.map((s,i)=>`${x(i)},${y(vals[i])}`).join(' ') + ` ${x(pts.length-1)},${PAD.t+cH}`;
+
+  // X axis labels (show ~6)
+  const step = Math.ceil(pts.length/6);
+  const xLabels = pts.map((s,i) => {
+    if (i%step!==0 && i!==pts.length-1) return '';
+    const d = new Date(s.data+'T12:00:00');
+    const label = d.toLocaleDateString('it-IT',{day:'numeric',month:'short'});
+    return `<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#6b7a72">${label}</text>`;
+  }).join('');
+
+  // Y axis labels (4 levels)
+  const yLabels = [0,1,2,3].map(i => {
+    const v = minV + (range/3)*i;
+    const yp = y(v);
+    return `<text x="${PAD.l-6}" y="${yp+4}" text-anchor="end" font-size="10" fill="#6b7a72">${Math.round(v)}</text>
+            <line x1="${PAD.l}" y1="${yp}" x2="${PAD.l+cW}" y2="${yp}" stroke="#2a3330" stroke-width="1"/>`;
+  }).join('');
+
+  // Dots with tooltips
+  const dots = pts.map((s,i) => {
+    const d = new Date(s.data+'T12:00:00');
+    const ds = d.toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'2-digit'});
+    const tip = tipo==='peso' ? `${ds}: ${s.peso} kg` : `${ds}: vol ${s.volume}`;
+    return `<circle cx="${x(i)}" cy="${y(vals[i])}" r="4" fill="${tipo==='peso'?'#c8ff00':'#00ffa3'}" stroke="var(--bg)" stroke-width="2">
+      <title>${tip}</title>
+    </circle>`;
+  }).join('');
+
+  const color = tipo==='peso' ? '#c8ff00' : '#00ffa3';
+  const title = tipo==='peso' ? 'Progressione Peso (kg)' : 'Progressione Volume (kg totali)';
+
+  return `<div class="analisi-card">
+    <h3>${title}</h3>
+    <div class="chart-wrap">
+      <svg class="chart-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="max-height:200px">
+        <defs>
+          <linearGradient id="grad-${tipo}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${color}" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- grid & labels -->
+        ${yLabels}
+        <!-- area fill -->
+        <polygon points="${areaPoints}" fill="url(#grad-${tipo})"/>
+        <!-- line -->
+        <polyline points="${points}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        <!-- dots -->
+        ${dots}
+        <!-- x labels -->
+        ${xLabels}
+      </svg>
+    </div>
+  </div>`;
+}
+
+// Aggiorna i select quando cambia le opzioni
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('btn-add-exercise')) return;
+  // Rigenera i select aperti
+});
+</script>
+
+
+</body></html>
